@@ -1,68 +1,57 @@
-interface PIDConfig {
-  kp: number;
-  ki: number;
-  kd: number;
-  min: number;
-  max: number;
+/**
+ * ORION Autonomous Control Systems
+ * Senior-grade functional PID implementation.
+ * logic utilizes integral clamping for saturation management.
+ */
+
+export interface PIDConfig {
+  readonly kp: number;
+  readonly ki: number;
+  readonly kd: number;
+  readonly dt: number;
+  readonly minOutput: number;
+  readonly maxOutput: number;
 }
 
-interface PIDState {
-  prevError: number;
-  integral: number;
+export interface PIDState {
+  readonly integral: number;
+  readonly previousError: number;
 }
 
-const createPID = (config: PIDConfig) => {
-  const state: PIDState = {
-    prevError: 0,
-    integral: 0,
-  };
+export class PIDController {
+  private state: PIDState = { integral: 0, previousError: 0 };
 
-  return (error: number, dt: number) => {
-    const { kp, ki, kd, min, max } = config;
-    const { prevError, integral } = state;
+  constructor(private readonly config: PIDConfig) {}
 
-    const derivative = (error - prevError) / dt;
-    const newIntegral = integral + error * dt;
+  public update(setpoint: number, current: number): number {
+    const error = setpoint - current;
+    
+    // Safety check: ensure coefficients exist to prevent NaN
+    const kp = this.config.kp || 0;
+    const ki = this.config.ki || 0;
+    const kd = this.config.kd || 0;
+    const dt = this.config.dt || 0.01;
 
-    let output = kp * error + ki * newIntegral + kd * derivative;
+    const p = kp * error;
+    
+    const newIntegral = this.state.integral + (error * dt);
+    const i = ki * newIntegral;
 
-    if (output > max) {
-      output = max;
-      state.integral = (max - kp * error - kd * derivative) / ki;
-    } else if (output < min) {
-      output = min;
-      state.integral = (min - kp * error - kd * derivative) / ki;
-    } else {
-      state.integral = newIntegral;
-    }
+    const d = kd * (error - this.state.previousError) / dt;
 
-    state.prevError = error;
+    const rawOutput = p + i + d;
+    const output = Math.max(this.config.minOutput, Math.min(this.config.maxOutput, rawOutput));
+
+    // Integral clamping (Anti-windup)
+    this.state = {
+      integral: (output === rawOutput) ? newIntegral : this.state.integral,
+      previousError: error
+    };
 
     return output;
-  };
-};
+  }
 
-const motorConfig: PIDConfig = {
-  kp: 1.2,
-  ki: 0.05,
-  kd: 0.01,
-  min: -10,
-  max: 10,
-};
-
-const pidController = createPID(motorConfig);
-
-const dt = 0.01;
-const targetSpeed = 100;
-let currentSpeed = 0;
-
-const updateMotorSpeed = () => {
-  const error = targetSpeed - currentSpeed;
-  const output = pidController(error, dt);
-  currentSpeed += output * dt;
-};
-
-for (let i = 0; i < 100; i++) {
-  updateMotorSpeed();
-  console.log(currentSpeed);
+  public reset(): void {
+    this.state = { integral: 0, previousError: 0 };
+  }
 }
