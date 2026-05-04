@@ -1,105 +1,73 @@
 interface State {
-  x: number;
-  v: number;
+  x: number
+  v: number
 }
 
 interface Measurement {
-  x: number;
+  x: number
+  v: number
 }
 
-interface Parameters {
-  q: number;
-  r: number;
-  dt: number;
+interface Covariance {
+  p11: number
+  p12: number
+  p21: number
+  p22: number
 }
 
-class KalmanFilter {
-  private state: State;
-  private covariance: number[][];
-  private parameters: Parameters;
+interface Gain {
+  k1: number
+  k2: number
+}
 
-  constructor(initialState: State, initialCovariance: number[][], parameters: Parameters) {
-    this.state = initialState;
-    this.covariance = initialCovariance;
-    this.parameters = parameters;
+function predict(state: State, covariance: Covariance, dt: number): [State, Covariance] {
+  const newState: State = {
+    x: state.x + state.v * dt,
+    v: state.v
   }
-
-  predict() {
-    const A = [
-      [1, this.parameters.dt],
-      [0, 1]
-    ];
-    const Q = [
-      [this.parameters.q * this.parameters.dt ** 3 / 3, this.parameters.q * this.parameters.dt ** 2 / 2],
-      [this.parameters.q * this.parameters.dt ** 2 / 2, this.parameters.q * this.parameters.dt]
-    ];
-    this.state = {
-      x: A[0][0] * this.state.x + A[0][1] * this.state.v,
-      v: A[1][0] * this.state.x + A[1][1] * this.state.v
-    };
-    this.covariance = addMatrices(multiplyMatrices(A, this.covariance), Q);
+  const newCovariance: Covariance = {
+    p11: covariance.p11 + covariance.p12 * dt + dt * dt * 0.1,
+    p12: covariance.p12,
+    p21: covariance.p21,
+    p22: covariance.p22 + 0.1 * dt
   }
+  return [newState, newCovariance]
+}
 
-  update(measurement: Measurement) {
-    const H = [1, 0];
-    const R = this.parameters.r;
-    const innovation = measurement.x - (H[0] * this.state.x + H[1] * this.state.v);
-    const S = H[0] * this.covariance[0][0] * H[0] + H[1] * this.covariance[1][0] * H[1] + R;
-    const K = [
-      this.covariance[0][0] * H[0] / S,
-      this.covariance[1][0] * H[1] / S
-    ];
-    this.state = {
-      x: this.state.x + K[0] * innovation,
-      v: this.state.v + K[1] * innovation
-    };
-    this.covariance = subtractMatrices(this.covariance, multiplyMatrices([K], [H], this.covariance));
+function update(state: State, covariance: Covariance, measurement: Measurement): [State, Covariance, Gain] {
+  const innovation = measurement.x - state.x
+  const innovationCovariance = covariance.p11 + 0.1
+  const gain: Gain = {
+    k1: covariance.p11 / innovationCovariance,
+    k2: covariance.p12 / innovationCovariance
   }
-
-  getState() {
-    return this.state;
+  const newState: State = {
+    x: state.x + gain.k1 * innovation,
+    v: state.v + gain.k2 * innovation
   }
-
-  getCovariance() {
-    return this.covariance;
+  const newCovariance: Covariance = {
+    p11: (1 - gain.k1) * covariance.p11,
+    p12: (1 - gain.k1) * covariance.p12,
+    p21: (1 - gain.k2) * covariance.p21,
+    p22: covariance.p22 - gain.k2 * covariance.p12
   }
+  return [newState, newCovariance, gain]
 }
 
-function addMatrices(a: number[][], b: number[][]): number[][] {
-  return a.map((row, i) => row.map((_, j) => a[i][j] + b[i][j]));
+function kalmanFilter(initialState: State, initialCovariance: Covariance, measurements: Measurement[], dt: number): [State, Covariance][] {
+  let state = initialState
+  let covariance = initialCovariance
+  const estimates: [State, Covariance][] = []
+  for (const measurement of measurements) {
+    [state, covariance] = predict(state, covariance, dt)
+    [state, covariance] = update(state, covariance, measurement)
+    estimates.push([state, covariance])
+  }
+  return estimates
 }
 
-function subtractMatrices(a: number[][], b: number[][]): number[][] {
-  return a.map((row, i) => row.map((_, j) => a[i][j] - b[i][j]));
-}
-
-function multiplyMatrices(...matrices: number[][][]): number[][] {
-  return matrices.reduce((acc, curr) => {
-    const result: number[][] = [];
-    for (let i = 0; i < acc.length; i++) {
-      result[i] = [];
-      for (let j = 0; j < curr[0].length; j++) {
-        let sum = 0;
-        for (let k = 0; k < acc[0].length; k++) {
-          sum += acc[i][k] * curr[k][j];
-        }
-        result[i][j] = sum;
-      }
-    }
-    return result;
-  });
-}
-
-function main() {
-  const initialState: State = { x: 0, v: 0 };
-  const initialCovariance: number[][] = [[1, 0], [0, 1]];
-  const parameters: Parameters = { q: 0.1, r: 1, dt: 0.1 };
-  const kalmanFilter = new KalmanFilter(initialState, initialCovariance, parameters);
-  kalmanFilter.predict();
-  const measurement: Measurement = { x: 1 };
-  kalmanFilter.update(measurement);
-  console.log(kalmanFilter.getState());
-  console.log(kalmanFilter.getCovariance());
-}
-
-main();
+const initialState: State = { x: 0, v: 0 }
+const initialCovariance: Covariance = { p11: 1, p12: 0, p21: 0, p22: 1 }
+const measurements: Measurement[] = [{ x: 1, v: 0 }, { x: 2, v: 0 }, { x: 3, v: 0 }]
+const dt = 1
+const estimates = kalmanFilter(initialState, initialCovariance, measurements, dt)
