@@ -2,9 +2,30 @@
 
 Autonomous agents remain economic ghosts when they lack the capacity to settle financial obligations for the data and intelligence they consume. ORION serves as the formal validation of a vision where mechatronic systems possess independent financial identities on Bitcoin rails. By facilitating sub cent commerce and sovereign resource procurement, this framework ensures that software no longer requires human intermediaries to acquire its own intelligence.
 
+## System Topology
+
+ORION bridges high-frequency mechatronic control loops with decentralized settlement layers.
+
+```mermaid
+graph TD
+    A[Autonomous Setpoint] --> B(PID Engine)
+    B --> C{Mechatronic Actuator}
+    C --> D[Kalman State Estimation]
+    D -->|Feedback Loop| B
+    C --> E[Telemetry Codec]
+    E --> F[Stacks/Bitcoin Settlement]
+```
+
 ## Statement of Purpose
 
 Software systems have historically functioned as economic observers, unable to participate in the exchange of value. ORION forges a financial identity for autonomous hardware, providing the rails required for agents to procure data and processing power independently. The project proves that granular commerce is viable and that software is now capable of purchasing its own computational growth.
+
+## Performance Analytics
+
+### Industrial Stability Verification
+To ensure the safety of autonomous economic actors, ORION logic is verified against industrial step-response metrics. The plot below confirms that the PID Engine achieves convergence without destructive oscillation.
+
+![Verification Plot](./assets/verification_plot.png)
 
 ## Architectural Pillars
 
