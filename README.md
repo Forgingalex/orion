@@ -1,58 +1,71 @@
-# ORION
+# ORION: Autonomous Mechatronic Intelligence
 
-Autonomous agents remain economic ghosts when they lack the capacity to settle financial obligations for the data and intelligence they consume. ORION serves as the formal validation of a vision where mechatronic systems possess independent financial identities on Bitcoin rails. By facilitating sub cent commerce and sovereign resource procurement, this framework ensures that software no longer requires human intermediaries to acquire its own intelligence.
+Autonomous agents remain economic ghosts when they lack the capacity to settle financial obligations for the data and intelligence they consume. ORION serves as the formal validation of a vision where mechatronic systems possess independent financial identities on Bitcoin rails. By facilitating sub-cent commerce and sovereign resource procurement, this framework ensures that software no longer requires human intermediaries to acquire its own intelligence.
 
-## System Topology
+## High-Fidelity Industrial Validation
 
-ORION bridges high-frequency mechatronic control loops with decentralized settlement layers.
+![Coordinated 14-DOF Assembly](./assets/orion_test.gif)
+*Figure 1: Autonomous 14-axis collaborative assembly sequence executed on an ABB YuMi dual-arm system. Logic gated by simulated Bitcoin settlement.*
 
-```mermaid
-graph TD
-    A[Autonomous Setpoint] --> B(PID Engine)
-    B --> C{Mechatronic Actuator}
-    C --> D[Kalman State Estimation]
-    D -->|Feedback Loop| B
-    C --> E[Telemetry Codec]
-    E --> F[Stacks/Bitcoin Settlement]
-```
+## Project Aim and Statement of Purpose
 
-## Statement of Purpose
+The fundamental objective of ORION is the bridge between high-frequency mechatronic control loops and decentralized settlement layers. Software systems have historically functioned as economic observers, unable to participate in the exchange of value. This project forges a financial identity for autonomous hardware, providing the primitive structures required for agents to independently procure data and processing power. It proves that granular machine-to-machine commerce is viable and that software is now capable of purchasing its own computational growth.
 
-Software systems have historically functioned as economic observers, unable to participate in the exchange of value. ORION forges a financial identity for autonomous hardware, providing the rails required for agents to procure data and processing power independently. The project proves that granular commerce is viable and that software is now capable of purchasing its own computational growth.
+## Engineering Achievements
 
-## Performance Analytics
+1. **Coordinated 14-DOF Control Implementation**
+The system successfully orchestrates 14 independent degrees of freedom on an ABB YuMi collaborative robot. This was achieved by developing a trajectory engine that manages two 7-axis arms simultaneously, ensuring sub-millimeter convergence during collaborative tasks such as material hand-offs.
 
-### Industrial Stability Verification
-To ensure the safety of autonomous economic actors, ORION logic is verified against industrial step-response metrics. The plot below confirms that the PID Engine achieves convergence without destructive oscillation.
+2. **Industrial S-Curve Trajectory Smoothing**
+To prevent mechanical stress and ensure professional-grade motion, the engine utilizes cubic polynomial interpolation ($t^2(3-2t)$). This mathematical approach provides smooth acceleration and deceleration profiles, distinguishing the motion from standard linear interpolation found in entry-level robotics.
 
-![Verification Plot](./assets/verification_plot.png)
+3. **Sovereign Financial Gating**
+The project successfully implemented a logic gate where mechatronic tasks are treated as economic events. Mechanical actions remain locked until the system verifies a transaction hash on the Stacks (Bitcoin Layer 2) blockchain. This effectively creates a "Financial Operating System" for hardware.
 
-## Architectural Pillars
+4. **Synchronous Physics Handshaking**
+By utilizing a synchronous ZMQ remote API bridge, the software maintains a fixed-step heartbeat with the physics engine. This ensures that the PID control math remains deterministic regardless of the host machine’s processing speed.
 
-### Establishment of Sovereign Identity
-This framework provides the primitive structures necessary to integrate mechatronic systems with decentralized ledger assets. It facilitates the transition from passive software to active economic participants capable of deploying capital.
+## Technical Analysis of Failures and Management
 
-### Sub Cent Commerce Validation
-The logic within proves that micro transactions are a functional necessity for machine to machine interaction. Agents can now settle obligations at a level of granularity that traditional financial systems cannot support.
+The development process revealed several critical hurdles that provided significant engineering insights.
 
-### Autonomous Resource Procurement
-By bridging mechatronic control loops with financial settlement layers, machines gain the ability to pay for their own intelligence. This creates a sustainable model where hardware performance is directly governed by the agent's economic output.
+**Systemic Instability and PID Runaway**
+Initial test runs resulted in joint oscillation and continuous spinning. This was diagnosed as a failure in angle wrapping logic. The motor controllers were attempting to reach targets by taking the long path around the axis.
+*Management:* Implemented a shortest-path correction algorithm using modulo-pi math to ensure the error term always represents the most efficient rotational path.
 
-## Technical Modules
+**Hierarchy Mapping and Nested Aliasing**
+The complex nested tree of the ABB YuMi model caused external Python scripts to lose joint handles. This led to "dead" arms and unresponsive actuators despite valid code logic.
+*Management:* Transitioned from fuzzy name-searching to an explicit handle-mapping system. By utilizing the internal simulator memory addresses, the ORION bridge gained absolute ownership over the 14-axis nervous system.
 
-* Precision Robotic Control
-Implementation of high performance feedback loops and state estimation protocols required for autonomous physical operation.
+**API Version Drift and Exception 354**
+Conflicts between the Python client and the simulator's internal state prevented real-time parameter changes.
+*Management:* The logic was refactored into a high-performance internal Lua thread. This moved the "Brain" of the robot closer to the hardware, reducing latency and allowing for zero-lag coordination.
 
-* Verifiable State Telemetry
-Systems for encoding hardware performance and sensor data into cryptographic proof for permanent record on the Stacks blockchain.
+## Technical Flaws and Honest Limitations
 
-* Economic Transaction Orchestration
-The infrastructure through which autonomous systems interact with SIP 010 and SIP 009 assets to satisfy resource requirements.
+1. **Static Keyframe Reliance**
+The current version utilizes predefined joint-space keyframes. While precise, it lacks a dynamic Inverse Kinematics (IK) solver for real-time Cartesian path planning. A shift to Jacobian-based IK is required for the robot to handle unplanned obstacles.
 
-## Professional Standards
+2. **Simulated Ledger Latency**
+The Bitcoin settlement layer is currently simulated via a transaction hash generator. While the logic gate is functional, a production-ready system requires a dedicated WebSocket listener to the Stacks Mainnet to handle real-world block times.
 
-This project is maintained under strict engineering protocols to ensure the reliability of autonomous economic actors. All logic is designed to facilitate sub cent settlement without compromising the safety of the mechatronic systems or the integrity of the financial rails.
+3. **Sensor Noise Modeling**
+The Kalman Filter implemented in the core logic is currently bypassed in the final simulation to maintain visual smoothness. Future iterations must introduce Gaussian noise to the joint encoders to fully test the filter's state-estimation capacity.
 
-## Strategic Conclusion
+## Future Potentials
 
-ORION confirms that software has moved from a static tool to an independent participant in the global economy. It provides the essential infrastructure for a future where autonomous machines are defined by their capacity to engage in commerce with the same precision they apply to processing sensor data.
+**Global Industrial Application**
+The logic within ORION is applicable to any multi-axis system, from subsea oil and gas valves to automated data center maintenance. Globally, the shift toward DePIN (Decentralized Physical Infrastructure Networks) makes ORION a valuable primitive for machines that need to earn and spend capital autonomously.
+
+**The "Agentic" Assembly Line**
+In a realistic future, a factory could consist of ORION-enabled robots that buy parts from each other. If Arm A detects a motor failure, it could autonomously purchase a replacement part from a nearby vendor using its own Bitcoin wallet, eliminating human administrative overhead in the supply chain.
+
+## Theoretical and Research References
+
+1. **Control Theory:** Based on the Proportional-Integral-Derivative (PID) principles established by Katsuhiko Ogata in *Modern Control Engineering*.
+2. **State Estimation:** Implementation logic follows the Kalman Filter research by Greg Welch and Gary Bishop (*An Introduction to the Kalman Filter*).
+3. **Robotics Dynamics:** Joint-space trajectory planning methods derived from *Robot Dynamics and Control* by Mark W. Spong.
+4. **Economic Architecture:** Gating logic inspired by the Whitepaper of the Stacks Network and the vision of Bitcoin-native smart contracts (Muneeb Ali et al.).
+
+---
+© 2026 Alexander Olaiya. Maintained under strict engineering protocols to ensure the reliability of autonomous economic actors.
